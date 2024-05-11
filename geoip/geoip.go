@@ -97,7 +97,7 @@ func geohashAndLocationFromIpapi(ipAddr string) (string, string, string, error) 
 	return gh, country, location, nil
 }
 
-func geohashAndLocationFromMaxMindDb(ipAddr, maxMindDbFileName string) (string, string, string, error) {
+func geohashAndLocationFromMaxMindDb(ipAddr, maxMindDbFileName string, recordCity bool) (string, string, string, error) {
 	db, err := geoip2.Open(maxMindDbFileName)
 	if err != nil {
 		return "s000", "Unknown", "Unknown", err
@@ -114,7 +114,7 @@ func geohashAndLocationFromMaxMindDb(ipAddr, maxMindDbFileName string) (string, 
 	latitude := cityRecord.Location.Latitude
 	longitude := cityRecord.Location.Longitude
 	iso := cityRecord.Country.IsoCode
-	if latitude == 0 && longitude == 0 {
+	if (latitude == 0 && longitude == 0) || !recordCity {
 		// In case of using Country DB, city is not available.
 		loc, ok := countryToLocation[iso]
 		if ok {
@@ -129,7 +129,11 @@ func geohashAndLocationFromMaxMindDb(ipAddr, maxMindDbFileName string) (string, 
 	}
 	gh := geohash.EncodeAuto(latitude, longitude)
 	country := composeCountry(countryName)
-	location := composeLocation(countryName, "", cityName)
+
+	var location = country
+	if recordCity {
+		location = composeLocation(countryName, "", cityName)
+	}
 
 	return gh, country, location, nil
 }
@@ -141,7 +145,9 @@ func GeohashAndLocation(ipAddr string, option GeoOption) (string, string, string
 	case "ip-api":
 		return geohashAndLocationFromIpapi(ipAddr)
 	case "max-mind-db":
-		return geohashAndLocationFromMaxMindDb(ipAddr, option.MaxMindDbFileName)
+		return geohashAndLocationFromMaxMindDb(ipAddr, option.MaxMindDbFileName, true)
+	case "max-mind-db-country-only":
+		return geohashAndLocationFromMaxMindDb(ipAddr, option.MaxMindDbFileName, false)
 	default:
 		return "s000", "Unknown", "Unknown", fmt.Errorf("unknown geoipSupplier %v.", option.GeoipSupplier)
 	}
