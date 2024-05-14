@@ -35,6 +35,7 @@ var (
 	totalSeconds       *prometheus.CounterVec
 	clientIP           *prometheus.CounterVec
 	clientSeconds      *prometheus.CounterVec
+	clientLastSeen     *prometheus.GaugeVec
 )
 
 func InitPrometheus(prometheusHost, prometheusPort, prometheusEntry string) {
@@ -77,6 +78,13 @@ func InitPrometheus(prometheusHost, prometheusPort, prometheusEntry string) {
 		},
 		[]string{"ip", "local_port"},
 	)
+	clientLastSeen = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "endlessh_client_last_seen",
+			Help: "Timestamp when a client was last seen.",
+		},
+		[]string{"ip"},
+	)
 	promReg := prometheus.NewRegistry()
 	promReg.MustRegister(totalClients)
 	promReg.MustRegister(totalClientsClosed)
@@ -84,6 +92,7 @@ func InitPrometheus(prometheusHost, prometheusPort, prometheusEntry string) {
 	promReg.MustRegister(totalSeconds)
 	promReg.MustRegister(clientIP)
 	promReg.MustRegister(clientSeconds)
+	promReg.MustRegister(clientLastSeen)
 	handler := promhttp.HandlerFor(promReg, promhttp.HandlerOpts{EnableOpenMetrics: true})
 	http.Handle("/"+prometheusEntry, handler)
 	go func() {
@@ -134,6 +143,7 @@ func StartRecording(maxClients int64, prometheusEnabled bool, prometheusCleanUns
 					"country":    country,
 					"location":   location}).Inc()
 				totalClients.With(prometheus.Labels{"local_port": r.LocalPort}).Inc()
+				clientLastSeen.With(prometheus.Labels{"ip": r.IpAddr}).SetToCurrentTime()
 				pq.Update(r.IpAddr, time.Now())
 			case RecordEntryTypeSend:
 				secondsSpent := float64(r.MillisecondsSpent) / 1000
@@ -157,6 +167,7 @@ func StartRecording(maxClients int64, prometheusEnabled bool, prometheusCleanUns
 				for top != nil && top.Value.Before(deadline) {
 					clientIP.DeletePartialMatch(prometheus.Labels{"ip": top.Key})
 					clientSeconds.DeletePartialMatch(prometheus.Labels{"ip": top.Key})
+					clientLastSeen.DeletePartialMatch(prometheus.Labels{"ip": top.Key})
 					pq.Pop()
 					top = pq.Peek()
 				}
