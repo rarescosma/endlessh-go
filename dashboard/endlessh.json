@@ -1,59 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__elements": {},
-  "__requires": [
-    {
-      "type": "panel",
-      "id": "geomap",
-      "name": "Geomap",
-      "version": ""
-    },
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "10.3.0-64399"
-    },
-    {
-      "type": "panel",
-      "id": "piechart",
-      "name": "Pie chart",
-      "version": ""
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "1.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "stat",
-      "name": "Stat",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "table",
-      "name": "Table",
-      "version": ""
-    },
-    {
-      "type": "panel",
-      "id": "timeseries",
-      "name": "Time series",
-      "version": ""
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -77,43 +22,18 @@
     ]
   },
   "description": "Dashboard for endlessh (Fix current connections)",
-  "editable": false,
+  "editable": true,
   "fiscalYearStartMonth": 0,
   "gnetId": 15156,
   "graphTooltip": 0,
-  "id": null,
-  "links": [
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": false,
-      "tags": [],
-      "targetBlank": true,
-      "title": "GitHub",
-      "tooltip": "GitHub",
-      "type": "link",
-      "url": "https://github.com/shizunge/endlessh-go"
-    },
-    {
-      "asDropdown": false,
-      "icon": "external link",
-      "includeVars": false,
-      "keepTime": false,
-      "tags": [],
-      "targetBlank": true,
-      "title": "Grafana",
-      "tooltip": "Grafana Dashboard",
-      "type": "link",
-      "url": "https://grafana.com/grafana/dashboards/15156"
-    }
-  ],
+  "id": 2,
+  "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -135,11 +55,11 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
+        "w": 2,
         "x": 0,
         "y": 0
       },
-      "id": 36,
+      "id": 50,
       "interval": "1m",
       "maxDataPoints": 1440,
       "options": {
@@ -151,114 +71,38 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^Total number connections that endlessh trapped$/",
+          "fields": "/^Value$/",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.0-64399",
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus-ds"
           },
           "editorMode": "code",
-          "expr": "(endlessh_client_open_count{instance=~\"$host\",job=~\"$job\"} - endlessh_client_open_count{instance=~\"$host\",job=~\"$job\"} offset $__interval) > 0 or (endlessh_client_open_count{instance=~\"$host\",job=~\"$job\"}!=0 unless endlessh_client_open_count{instance=~\"$host\",job=~\"$job\"} offset $__interval)",
+          "exemplar": false,
+          "expr": "sum(increase(endlessh_client_open_count_total[$__range]))",
           "format": "table",
-          "instant": false,
-          "legendFormat": "Seen {{ip}}",
-          "range": true,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
           "refId": "Seen"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "(endlessh_client_trapped_time_seconds{instance=~\"$host\",job=~\"$job\"} - endlessh_client_trapped_time_seconds{instance=~\"$host\",job=~\"$job\"} offset $__interval) > 0 or (endlessh_client_trapped_time_seconds{instance=~\"$host\",job=~\"$job\"}!=0 unless endlessh_client_trapped_time_seconds{instance=~\"$host\",job=~\"$job\"} offset $__interval)",
-          "format": "table",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "Trapped {{ip}}",
-          "range": true,
-          "refId": "Trapped"
         }
       ],
       "title": "Connections",
-      "transformations": [
-        {
-          "id": "filterByRefId",
-          "options": {
-            "include": "Seen"
-          }
-        },
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Value #Seen"
-              }
-            ],
-            "match": "any",
-            "type": "include"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Value #Seen": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "ip": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            }
-          }
-        },
-        {
-          "id": "reduce",
-          "options": {
-            "includeTimeField": false,
-            "labelsToFields": false,
-            "mode": "reduceFields",
-            "reducers": [
-              "sum"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Value #Seen (sum)": "Total number connections that endlessh trapped"
-            }
-          }
-        }
-      ],
       "type": "stat"
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
+        "type": "prometheus",
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -274,18 +118,18 @@
                 "value": null
               }
             ]
-          },
-          "unit": "s"
+          }
         },
         "overrides": []
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
-        "x": 4,
+        "w": 2,
+        "x": 2,
         "y": 0
       },
-      "id": 42,
+      "id": 38,
+      "interval": "1m",
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -295,96 +139,38 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^Time spent on endlessh$/",
+          "fields": "/^Value$/",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.0-64399",
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
+            "type": "prometheus",
+            "uid": "prometheus-ds"
           },
-          "panelId": 36,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "count(increase(endlessh_client_trapped_time_seconds[$__range]) > 0)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
           "refId": "A"
         }
       ],
-      "title": "Trapped Time",
-      "transformations": [
-        {
-          "id": "filterByRefId",
-          "options": {
-            "include": "Trapped"
-          }
-        },
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Value #Trapped"
-              }
-            ],
-            "match": "all",
-            "type": "include"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Value #Trapped": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "ip": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            }
-          }
-        },
-        {
-          "id": "reduce",
-          "options": {
-            "includeTimeField": false,
-            "labelsToFields": false,
-            "mode": "reduceFields",
-            "reducers": [
-              "sum"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Total": "Seconds spent on endlessh",
-              "Value #Trapped (sum)": "Time spent on endlessh"
-            }
-          }
-        }
-      ],
+      "title": "Unique IPs",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -407,8 +193,8 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 4,
-        "x": 8,
+        "w": 2,
+        "x": 4,
         "y": 0
       },
       "id": 18,
@@ -424,349 +210,29 @@
           "fields": "",
           "values": false
         },
+        "showPercentChange": false,
         "text": {},
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "10.3.0-64399",
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
+            "uid": "prometheus-ds"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "sum(increase(endlessh_sent_bytes_total{instance=~\"$host\",job=~\"$job\"}[$__range]))",
+          "expr": "sum(increase(endlessh_sent_bytes_total[$__range]))",
           "hide": false,
           "interval": "",
           "legendFormat": "Bytes sent by endlessh",
+          "range": true,
           "refId": "sent_bytes"
         }
       ],
       "title": "Sent Bytes",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 12,
-        "y": 0
-      },
-      "id": 38,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^Unique IPs connected$/",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.3.0-64399",
-      "targets": [
-        {
-          "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
-          },
-          "panelId": 36,
-          "refId": "A"
-        }
-      ],
-      "title": "Unique IPs",
-      "transformations": [
-        {
-          "id": "filterByRefId",
-          "options": {
-            "include": "Seen"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Value #Seen": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "ip": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            }
-          }
-        },
-        {
-          "id": "reduce",
-          "options": {
-            "includeTimeField": false,
-            "labelsToFields": false,
-            "mode": "reduceFields",
-            "reducers": [
-              "count"
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Value #Seen (sum)": "Unique IPs connected",
-              "ip": ""
-            }
-          }
-        }
-      ],
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "links": [
-            {
-              "targetBlank": true,
-              "title": "whois",
-              "url": "https://search.arin.net/rdap/?query=${__value.text}"
-            }
-          ],
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 16,
-        "y": 0
-      },
-      "id": 45,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "/^Client IP of the latest connection$/",
-          "values": false
-        },
-        "text": {},
-        "textMode": "value",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.3.0-64399",
-      "targets": [
-        {
-          "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
-          },
-          "panelId": 36,
-          "refId": "A"
-        }
-      ],
-      "title": "Latest Connection",
-      "transformations": [
-        {
-          "id": "filterByRefId",
-          "options": {
-            "include": "Seen"
-          }
-        },
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Value #Seen"
-              }
-            ],
-            "match": "any",
-            "type": "include"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Time": {
-                "aggregations": [
-                  "lastNotNull"
-                ],
-                "operation": "aggregate"
-              },
-              "Value #Seen": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "ip": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            }
-          }
-        },
-        {
-          "id": "sortBy",
-          "options": {
-            "fields": {},
-            "sort": [
-              {
-                "field": "Time (lastNotNull)"
-              }
-            ]
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "instance": true,
-              "job": true
-            },
-            "indexByName": {},
-            "renameByName": {
-              "Time (lastNotNull)": "Time",
-              "Value #Seen (sum)": "Count",
-              "ip": "Client IP of the latest connection"
-            }
-          }
-        }
-      ],
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "#EAB839",
-                "value": 10
-              },
-              {
-                "color": "red",
-                "value": 20
-              }
-            ]
-          },
-          "unit": "short"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 4,
-        "x": 20,
-        "y": 0
-      },
-      "id": 20,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "text": {},
-        "textMode": "auto",
-        "wideLayout": true
-      },
-      "pluginVersion": "10.3.0-64399",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "exemplar": true,
-          "expr": "sum((endlessh_client_open_count_total{instance=~\"$host\",job=~\"$job\"}) - (endlessh_client_closed_count_total{instance=~\"$host\",job=~\"$job\"} or endlessh_client_open_count_total{instance=~\"$host\",job=~\"$job\"} * 0))",
-          "instant": false,
-          "interval": "",
-          "legendFormat": "Open Connections",
-          "refId": "current_open"
-        }
-      ],
-      "title": "Current Connections",
       "type": "stat"
     },
     {
@@ -826,10 +292,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 12,
-        "x": 0,
-        "y": 3
+        "h": 6,
+        "w": 6,
+        "x": 6,
+        "y": 0
       },
       "id": 30,
       "options": {
@@ -859,8 +325,8 @@
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
+        "type": "prometheus",
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -874,15 +340,16 @@
               "viz": false
             }
           },
+          "decimals": 0,
           "mappings": []
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 11,
         "w": 12,
         "x": 12,
-        "y": 3
+        "y": 0
       },
       "id": 32,
       "options": {
@@ -891,10 +358,13 @@
           "displayMode": "table",
           "placement": "right",
           "showLegend": true,
+          "sortBy": "Percent",
+          "sortDesc": false,
           "values": [
             "value",
             "percent"
-          ]
+          ],
+          "width": 500
         },
         "pieType": "pie",
         "reduceOptions": {
@@ -909,279 +379,213 @@
           "sort": "none"
         }
       },
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
+            "type": "prometheus",
+            "uid": "prometheus-ds"
           },
-          "panelId": 36,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by(country) (increase(endlessh_client_open_count_total[$__range]) > 0)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
           "refId": "A"
         }
       ],
       "title": "Connections by country",
       "transformations": [
         {
-          "id": "filterByRefId",
-          "options": {
-            "include": "Seen"
-          }
-        },
-        {
           "id": "filterByValue",
           "options": {
             "filters": [
               {
                 "config": {
-                  "id": "greaterOrEqual",
+                  "id": "isNull",
+                  "options": {}
+                },
+                "fieldName": "country"
+              },
+              {
+                "config": {
+                  "id": "equal",
                   "options": {
-                    "value": 0
+                    "value": ""
                   }
                 },
-                "fieldName": "Value #Seen"
+                "fieldName": "country"
               }
             ],
             "match": "any",
-            "type": "include"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Value #Seen": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "country": {
-                "aggregations": [
-                  "last"
-                ],
-                "operation": "aggregate"
-              },
-              "ip": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            }
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Value #Seen (sum)": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "country (last)": {
-                "aggregations": [],
-                "operation": "groupby"
-              }
-            }
+            "type": "exclude"
           }
         },
         {
           "id": "rowsToFields",
-          "options": {}
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "Time",
+                "handlerKey": "__ignore"
+              }
+            ]
+          }
         }
       ],
       "type": "piechart"
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
+        "type": "prometheus",
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "#96D98D",
+                "color": "green",
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 12,
-        "w": 12,
+        "h": 3,
+        "w": 3,
         "x": 0,
-        "y": 7
+        "y": 3
       },
-      "id": 48,
-      "links": [],
+      "id": 42,
       "options": {
-        "basemap": {
-          "config": {},
-          "name": "Layer 0",
-          "type": "default"
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^Value$/",
+          "values": false
         },
-        "controls": {
-          "mouseWheelZoom": false,
-          "showAttribution": false,
-          "showDebug": false,
-          "showMeasure": false,
-          "showScale": false,
-          "showZoom": true
-        },
-        "layers": [
-          {
-            "config": {
-              "color": {
-                "field": "Connections",
-                "fixed": "dark-green"
-              },
-              "fillOpacity": 0.4,
-              "shape": "circle",
-              "showLegend": false,
-              "size": {
-                "field": "Connections",
-                "fixed": 5,
-                "max": 10,
-                "min": 2
-              },
-              "style": {
-                "color": {
-                  "field": "Connections",
-                  "fixed": "dark-green"
-                },
-                "size": {
-                  "field": "Connections",
-                  "fixed": 5,
-                  "max": 9,
-                  "min": 2
-                },
-                "text": {
-                  "field": "location (lastNotNull) (lastNotNull)",
-                  "fixed": "",
-                  "mode": "fixed"
-                }
-              }
-            },
-            "location": {
-              "geohash": "Geohash",
-              "mode": "geohash"
-            },
-            "name": "Layer 1",
-            "type": "markers"
-          }
-        ],
-        "tooltip": {
-          "mode": "details"
-        },
-        "view": {
-          "allLayers": true,
-          "id": "zero",
-          "lat": 0,
-          "lon": 0,
-          "zoom": 1
-        }
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "10.3.0-64399",
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
+            "type": "prometheus",
+            "uid": "prometheus-ds"
           },
-          "panelId": 36,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum(increase(endlessh_trapped_time_seconds_total[$__range]))",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
           "refId": "A"
         }
       ],
-      "title": "Locations",
-      "transformations": [
-        {
-          "id": "filterByRefId",
-          "options": {
-            "include": "Seen"
-          }
-        },
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Value #Seen"
-              }
-            ],
-            "match": "any",
-            "type": "include"
-          }
-        },
-        {
-          "id": "groupBy",
-          "options": {
-            "fields": {
-              "Value #Seen": {
-                "aggregations": [
-                  "sum"
-                ],
-                "operation": "aggregate"
-              },
-              "geohash": {
-                "aggregations": [
-                  "lastNotNull"
-                ],
-                "operation": "groupby"
-              },
-              "location": {
-                "aggregations": [
-                  "lastNotNull"
-                ],
-                "operation": "aggregate"
-              }
-            }
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {
-              "Value #geo (lastNotNull) (sum)": 2,
-              "geohash (lastNotNull)": 0,
-              "location (lastNotNull) (lastNotNull)": 1
-            },
-            "renameByName": {
-              "Value #Seen (sum)": "Connections",
-              "geohash": "Geohash",
-              "location (lastNotNull)": "Location"
-            }
-          }
-        }
-      ],
-      "type": "geomap"
+      "title": "Trapped Time",
+      "type": "stat"
     },
     {
       "datasource": {
-        "type": "datasource",
-        "uid": "-- Dashboard --"
+        "type": "prometheus",
+        "uid": "prometheus-ds"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 3,
+        "y": 3
+      },
+      "id": 20,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-ds"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum without(country) (endlessh_client_open_count_total) - endlessh_client_closed_count_total",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Open Connections",
+          "range": true,
+          "refId": "current_open"
+        }
+      ],
+      "title": "Current Connections",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus-ds"
       },
       "fieldConfig": {
         "defaults": {
@@ -1263,10 +667,10 @@
         ]
       },
       "gridPos": {
-        "h": 8,
+        "h": 15,
         "w": 12,
-        "x": 12,
-        "y": 11
+        "x": 0,
+        "y": 6
       },
       "id": 49,
       "options": {
@@ -1288,101 +692,45 @@
           }
         ]
       },
-      "pluginVersion": "10.3.0-64399",
+      "pluginVersion": "10.4.2",
       "targets": [
         {
           "datasource": {
-            "type": "datasource",
-            "uid": "-- Dashboard --"
+            "type": "prometheus",
+            "uid": "prometheus-ds"
           },
-          "panelId": 36,
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "sum by(ip, country) (increase(endlessh_client_trapped_time_seconds[$__range]) + on(ip) group_left(country) endlessh_client_open_count * 0)",
+          "format": "table",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus-ds"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "endlessh_client_last_seen",
+          "format": "table",
+          "hide": false,
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "B"
         }
       ],
       "title": "Clients",
       "transformations": [
         {
-          "id": "filterByValue",
+          "id": "joinByField",
           "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Value #Seen"
-              },
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Value #Trapped"
-              }
-            ],
-            "match": "any",
-            "type": "include"
-          }
-        },
-        {
-          "id": "merge",
-          "options": {}
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Seen",
-            "mode": "reduceRow",
-            "reduce": {
-              "include": [
-                "Value #Seen"
-              ],
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "calculateField",
-          "options": {
-            "alias": "Trapped",
-            "mode": "reduceRow",
-            "reduce": {
-              "include": [
-                "Value #Trapped"
-              ],
-              "reducer": "sum"
-            }
-          }
-        },
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Seen"
-              },
-              {
-                "config": {
-                  "id": "greaterOrEqual",
-                  "options": {
-                    "value": 0
-                  }
-                },
-                "fieldName": "Trapped"
-              }
-            ],
-            "match": "all",
-            "type": "include"
+            "byField": "ip",
+            "mode": "inner"
           }
         },
         {
@@ -1398,12 +746,29 @@
               "Time": {
                 "aggregations": [
                   "max"
-                ],
-                "operation": "aggregate"
+                ]
               },
               "Trapped": {
                 "aggregations": [
                   "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Value": {
+                "aggregations": [
+                  "lastNotNull"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #A": {
+                "aggregations": [
+                  "last"
+                ],
+                "operation": "aggregate"
+              },
+              "Value #B": {
+                "aggregations": [
+                  "last"
                 ],
                 "operation": "aggregate"
               },
@@ -1426,10 +791,12 @@
             "filters": [
               {
                 "config": {
-                  "id": "isNull",
-                  "options": {}
+                  "id": "lowerOrEqual",
+                  "options": {
+                    "value": 0
+                  }
                 },
-                "fieldName": "ip"
+                "fieldName": "Value (lastNotNull)"
               }
             ],
             "match": "any",
@@ -1437,20 +804,41 @@
           }
         },
         {
+          "id": "calculateField",
+          "options": {
+            "binary": {
+              "left": "Value #B (last)",
+              "operator": "*",
+              "right": "1000"
+            },
+            "mode": "binary",
+            "reduce": {
+              "reducer": "sum"
+            }
+          }
+        },
+        {
           "id": "organize",
           "options": {
-            "excludeByName": {},
+            "excludeByName": {
+              "Value #B (last)": true
+            },
+            "includeByName": {},
             "indexByName": {
-              "Seen (sum)": 3,
-              "Time (max)": 0,
-              "Trapped (sum)": 4,
-              "country (lastNotNull)": 2,
-              "ip": 1
+              "Value #A (last)": 4,
+              "Value #B (last)": 1,
+              "Value #B (last) * 1000": 0,
+              "country (lastNotNull)": 3,
+              "ip": 2
             },
             "renameByName": {
               "Seen (sum)": "Connections",
               "Time (max)": "Last Connection",
               "Trapped (sum)": "Trapped Time",
+              "Value #A (last)": "Trapped Time",
+              "Value #B (last)": "",
+              "Value #B (last) * 1000": "Last Connection",
+              "Value (lastNotNull)": "Trapped Time",
               "country (lastNotNull)": "Country",
               "ip": "IP"
             }
@@ -1458,6 +846,144 @@
         }
       ],
       "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "datasource",
+        "uid": "-- Dashboard --"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#96D98D",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 48,
+      "options": {
+        "basemap": {
+          "config": {},
+          "name": "Layer 0",
+          "type": "default"
+        },
+        "controls": {
+          "mouseWheelZoom": false,
+          "showAttribution": false,
+          "showDebug": false,
+          "showMeasure": false,
+          "showScale": false,
+          "showZoom": true
+        },
+        "layers": [
+          {
+            "config": {
+              "color": {
+                "field": "Connections",
+                "fixed": "dark-green"
+              },
+              "fillOpacity": 0.4,
+              "shape": "circle",
+              "showLegend": false,
+              "size": {
+                "field": "Connections",
+                "fixed": 5,
+                "max": 10,
+                "min": 2
+              },
+              "style": {
+                "color": {
+                  "field": "Connections",
+                  "fixed": "dark-green"
+                },
+                "size": {
+                  "field": "Connections",
+                  "fixed": 5,
+                  "max": 9,
+                  "min": 2
+                },
+                "text": {
+                  "field": "location (lastNotNull) (lastNotNull)",
+                  "fixed": "",
+                  "mode": "fixed"
+                }
+              }
+            },
+            "location": {
+              "geohash": "Geohash",
+              "lookup": "country",
+              "mode": "lookup"
+            },
+            "name": "Layer 1",
+            "type": "markers"
+          }
+        ],
+        "tooltip": {
+          "mode": "details"
+        },
+        "view": {
+          "allLayers": true,
+          "id": "zero",
+          "lat": 0,
+          "lon": 0,
+          "zoom": 1
+        }
+      },
+      "pluginVersion": "10.4.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "datasource",
+            "uid": "-- Dashboard --"
+          },
+          "panelId": 32,
+          "refId": "A"
+        }
+      ],
+      "title": "Locations",
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Time": true
+            },
+            "includeByName": {},
+            "indexByName": {},
+            "renameByName": {
+              "Value": "Connections",
+              "Value (sum)": "Connections",
+              "country": "Location",
+              "geohash": "Geohash",
+              "location (lastNotNull)": "Location"
+            }
+          }
+        }
+      ],
+      "type": "geomap"
     }
   ],
   "refresh": "",
@@ -1466,65 +992,16 @@
     "prometheus"
   ],
   "templating": {
-    "list": [
-      {
-        "allValue": ".*",
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
-        },
-        "definition": "label_values(endlessh_client_open_count_total, job)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Job",
-        "multi": true,
-        "name": "job",
-        "options": [],
-        "query": {
-          "query": "label_values(endlessh_client_open_count_total, job)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      },
-      {
-        "allValue": ".*",
-        "current": {},
-        "datasource": {
-          "type": "prometheus",
-          "uid": "${DS_PROMETHEUS}"
-        },
-        "definition": "label_values(endlessh_client_open_count_total{job=~\"$job\"}, instance)",
-        "hide": 0,
-        "includeAll": true,
-        "label": "Host",
-        "multi": true,
-        "name": "host",
-        "options": [],
-        "query": {
-          "query": "label_values(endlessh_client_open_count_total{job=~\"$job\"}, instance)",
-          "refId": "StandardVariableQuery"
-        },
-        "refresh": 2,
-        "regex": "",
-        "skipUrlSync": false,
-        "sort": 1,
-        "type": "query"
-      }
-    ]
+    "list": []
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
-  "title": "Endlessh",
-  "uid": "ATIxYkO7k",
-  "version": 12,
+  "title": "Endlessh Snappy",
+  "uid": "adlnu08msibr4e",
+  "version": 2,
   "weekStart": ""
 }
