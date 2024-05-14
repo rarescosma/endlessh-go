@@ -44,7 +44,7 @@ func InitPrometheus(prometheusHost, prometheusPort, prometheusEntry string) {
 		prometheus.CounterOpts{
 			Name: "endlessh_client_open_count_total",
 			Help: "Total number of clients that tried to connect to this host.",
-		}, []string{"local_port"},
+		}, []string{"local_port", "country"},
 	)
 	totalClientsClosed = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
@@ -142,7 +142,7 @@ func StartRecording(maxClients int64, prometheusEnabled bool, prometheusCleanUns
 					"geohash":    geohash,
 					"country":    country,
 					"location":   location}).Inc()
-				totalClients.With(prometheus.Labels{"local_port": r.LocalPort}).Inc()
+				totalClients.With(prometheus.Labels{"local_port": r.LocalPort, "country": country}).Inc()
 				clientLastSeen.With(prometheus.Labels{"ip": r.IpAddr}).SetToCurrentTime()
 				pq.Update(r.IpAddr, time.Now())
 			case RecordEntryTypeSend:
