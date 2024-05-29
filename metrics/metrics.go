@@ -83,7 +83,7 @@ func InitPrometheus(prometheusHost, prometheusPort, prometheusEntry string) {
 			Name: "endlessh_client_last_seen",
 			Help: "Timestamp when a client was last seen.",
 		},
-		[]string{"ip"},
+		[]string{"ip", "country"},
 	)
 	promReg := prometheus.NewRegistry()
 	promReg.MustRegister(totalClients)
@@ -143,7 +143,7 @@ func StartRecording(maxClients int64, prometheusEnabled bool, prometheusCleanUns
 					"country":    country,
 					"location":   location}).Inc()
 				totalClients.With(prometheus.Labels{"local_port": r.LocalPort, "country": country}).Inc()
-				clientLastSeen.With(prometheus.Labels{"ip": r.IpAddr}).SetToCurrentTime()
+				clientLastSeen.With(prometheus.Labels{"ip": r.IpAddr, "country": country}).SetToCurrentTime()
 				pq.Update(r.IpAddr, time.Now())
 			case RecordEntryTypeSend:
 				secondsSpent := float64(r.MillisecondsSpent) / 1000
